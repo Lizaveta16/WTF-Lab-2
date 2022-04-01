@@ -1,31 +1,34 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../models/event_categyory.dart';
+import '../../cubit/category_list_cubit.dart';
+import '../../models/event_category.dart';
 import '../../models/icons_pack.dart';
+import '../theme/inherited_widget.dart';
+import '../theme/theme_data.dart';
 
 Future<dynamic> addTaskDialog(BuildContext context) {
   return showModalBottomSheet(
-      isScrollControlled: true,
-      backgroundColor: Colors.white.withOpacity(0.0),
-      constraints: BoxConstraints(
-        maxWidth: MediaQuery.of(context).size.width * 0.95,
-      ),
-      context: context,
-      builder: (context) {
-        return SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom),
-            child: ModalBody(),
-          ),
-        );
-      });
+    isScrollControlled: true,
+    backgroundColor: Colors.white.withOpacity(0.0),
+    constraints: BoxConstraints(
+      maxWidth: MediaQuery.of(context).size.width * 0.95,
+    ),
+    context: context,
+    builder: (context) {
+      return SingleChildScrollView(
+        child: Padding(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: ModalBody(),
+        ),
+      );
+    },
+  );
 }
 
 class ModalBody extends StatefulWidget {
-  final controller = TextEditingController();
   ModalBody({Key? key}) : super(key: key);
 
   @override
@@ -33,28 +36,32 @@ class ModalBody extends StatefulWidget {
 }
 
 class _ModalBodyState extends State<ModalBody> {
-  bool isSelected = false;
-  int selectedIndexAvatar = -1;
+  final _controller = TextEditingController();
+  bool _isSelected = false;
+  int _selectedIndexAvatar = -1;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final _screenSize = MediaQuery.of(context).size;
     return Container(
-      constraints:
-          BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.95),
-      margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.05),
+      constraints: BoxConstraints(maxHeight: _screenSize.height * 0.95),
+      margin: EdgeInsets.only(top: _screenSize.height * 0.05),
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-      ),
-      height: MediaQuery.of(context).size.height * 0.43,
-      child: Padding(
-        padding: const EdgeInsets.only(
-          bottom: 20.0,
-          left: 20,
-          top: 20,
-          right: 20,
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
         ),
+      ),
+      height: _screenSize.height * 0.45,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -71,93 +78,105 @@ class _ModalBodyState extends State<ModalBody> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.7,
-                    child: CupertinoTextField(
-                      placeholder: 'Enter the name',
-                      controller: widget.controller,
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      if (selectedIndexAvatar == -1) {
-                        setState(
-                          () {
-                            context.read<CategoryList>().add(
-                                  EventCategory(
-                                    widget.controller.text,
-                                    false,
-                                    kMyIcons[7],
-                                  ),
-                                );
-                            Navigator.pop(context);
-                          },
-                        );
-                      } else {
-                        setState(
-                          () {
-                            context.read<CategoryList>().add(
-                                  EventCategory(
-                                    widget.controller.text,
-                                    false,
-                                    kMyIcons[selectedIndexAvatar],
-                                  ),
-                                );
-                            Navigator.pop(context);
-                          },
-                        );
-                      }
-                    },
-                    icon: const Icon(
-                      Icons.send,
-                      color: Colors.white,
-                    ),
-                  )
+                  _addTextField(_screenSize, context),
+                  _addButton(context)
                 ],
               ),
             ),
             SizedBox(
-              height: MediaQuery.of(context).size.height * 0.02,
+              height: _screenSize.height * 0.02,
             ),
-            Container(
-              constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.30),
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 120,
-                    childAspectRatio: 3 / 2,
-                    crossAxisSpacing: 20,
-                    mainAxisSpacing: 20),
-                itemCount: kMyIcons.length,
-                itemBuilder: (context, i) {
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isSelected = !isSelected;
-                        selectedIndexAvatar = i;
-                        print(selectedIndexAvatar.toString());
-                      });
-                    },
-                    child: CircleAvatar(
-                      backgroundColor: (selectedIndexAvatar == i)
-                          ? Theme.of(context).primaryColor
-                          : Colors.white,
-                      radius: MediaQuery.of(context).size.width * 0.13,
-                      child: CategoryIconButton(
-                        icon: kMyIcons[i],
-                        size: MediaQuery.of(context).size.width * 0.13,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            )
+            _iconGrid(_screenSize)
           ],
         ),
+      ),
+    );
+  }
+
+  Container _iconGrid(Size _screenSize) {
+    return Container(
+      constraints: BoxConstraints(maxHeight: _screenSize.height * 0.30),
+      child: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 120,
+            childAspectRatio: 3 / 2,
+            crossAxisSpacing: 20,
+            mainAxisSpacing: 20),
+        itemCount: kMyIcons.length,
+        itemBuilder: (context, i) {
+          return GestureDetector(
+            onTap: () {
+              setState(
+                () {
+                  _isSelected = !_isSelected;
+                  _selectedIndexAvatar = i;
+                },
+              );
+            },
+            child: CircleAvatar(
+              backgroundColor: (_selectedIndexAvatar == i)
+                  ? Theme.of(context).primaryColor
+                  : Theme.of(context).scaffoldBackgroundColor,
+              foregroundColor:
+                  (CustomTheme.of(context).theme == MyThemes.darkTheme)
+                      ? ((_selectedIndexAvatar == i)
+                          ? Colors.white
+                          : Theme.of(context).primaryColor)
+                      : ((_selectedIndexAvatar == i)
+                          ? Colors.white
+                          : Theme.of(context).primaryColor),
+              radius: _screenSize.width * 0.13,
+              child: CategoryIconButton(
+                icon: kMyIcons[i],
+                size: _screenSize.width * 0.13,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Container _addTextField(Size _screenSize, BuildContext context) {
+    return Container(
+      width: _screenSize.width * 0.7,
+      child: CupertinoTextField(
+        placeholder: 'Enter the name',
+        controller: _controller,
+        style: TextStyle(
+          fontSize: 20,
+          color: Theme.of(context).primaryColor,
+        ),
+      ),
+    );
+  }
+
+  IconButton _addButton(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        if (_selectedIndexAvatar == -1) {
+          context.read<CategoryListCubit>().add(EventCategory(
+                title: _controller.text,
+                pined: false,
+                icon: kMyIcons[7],
+              ));
+          Navigator.pop(
+            context,
+          );
+        } else {
+          context.read<CategoryListCubit>().add(EventCategory(
+                title: _controller.text,
+                pined: false,
+                icon: kMyIcons[_selectedIndexAvatar],
+              ));
+          Navigator.pop(
+            context,
+          );
+        }
+      },
+      icon: const Icon(
+        Icons.send,
+        color: Colors.white,
       ),
     );
   }

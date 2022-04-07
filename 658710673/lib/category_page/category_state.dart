@@ -2,13 +2,13 @@ import '../models/category.dart';
 import '../models/section.dart';
 
 class CategoryState {
-  bool isSearchMode;
-  bool isEditingMode;
-  bool isFavoriteMode;
+  final bool isSearchMode;
+  final bool isEditingMode;
+  final bool isFavoriteMode;
   final Category? category;
-  bool isWritingMode;
-  bool isMessageEdit;
-  bool isAttachment;
+  final bool isWritingMode;
+  final bool isMessageEdit;
+  final bool isAttachment;
   final Category? replyCategory;
   final int replyCategoryIndex;
   final Section? selectedSection;

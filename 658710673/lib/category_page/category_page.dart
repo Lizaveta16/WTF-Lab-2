@@ -159,7 +159,7 @@ class _CategoryPageState extends State<CategoryPage> {
         ),
         IconButton(
           icon: const Icon(Icons.delete),
-          onPressed: () => _dialog(context),
+          onPressed: () => _showDialog(context),
         ),
       ],
     );
@@ -407,7 +407,7 @@ class _CategoryPageState extends State<CategoryPage> {
   }
 
   Widget _sectionItem(CategoryState state, int index) {
-    var section = Section(
+    final section = Section(
       title: sections.keys.elementAt(index),
       iconData: sections.values.elementAt(index),
     );
@@ -431,7 +431,7 @@ class _CategoryPageState extends State<CategoryPage> {
     );
   }
 
-  void _dialog(BuildContext ctx) {
+  void _showDialog(BuildContext ctx) {
     showDialog(
       context: context,
       barrierDismissible: false,

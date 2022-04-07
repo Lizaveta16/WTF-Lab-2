@@ -1,5 +1,5 @@
 class CreateCategoryPageState {
-  int selectedIcon;
+  final int selectedIcon;
 
   CreateCategoryPageState({this.selectedIcon = 0});
 

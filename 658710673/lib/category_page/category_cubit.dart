@@ -59,9 +59,9 @@ class CategoryCubit extends Cubit<CategoryState> {
       return;
     }
     if (state.isEditingMode) {
-      state.isEditingMode = false;
-      state.isMessageEdit = false;
-      var selectedEventIndex =
+      changeEditingMode();
+      changeMessageEditMode();
+      final selectedEventIndex =
           state.category!.events.indexWhere((element) => element.isSelected == true);
       state.category!.events[selectedEventIndex].description = controller.text;
       cancelSelectedEvents();
@@ -72,7 +72,7 @@ class CategoryCubit extends Cubit<CategoryState> {
       ));
     }
     controller.text = '';
-    state.isWritingMode = false;
+    changeWritingMode(controller.text);
 
     emit(state.copyWith(category: state.category, isMessageEdit: state.isMessageEdit));
   }
@@ -102,17 +102,17 @@ class CategoryCubit extends Cubit<CategoryState> {
   }
 
   void editEvent(TextEditingController controller) {
-    var selectedEventIndex =
+    final selectedEventIndex =
         state.category!.events.indexWhere((element) => element.isSelected == true);
     controller.text = (state.category!.events[selectedEventIndex].description);
-    state.isMessageEdit = true;
-    state.isEditingMode = true;
+    changeMessageEditMode();
+    changeEditingMode();
     emit(state.copyWith(isMessageEdit: state.isMessageEdit, isEditingMode: state.isEditingMode));
   }
 
   void copyToClipboard() {
     var selectedText = '';
-    var selectedEventIndex =
+    final selectedEventIndex =
         state.category!.events.indexWhere((element) => element.isSelected == true);
     if (state.category!.events[selectedEventIndex].attachment != null) {
       selectedText = state.category!.events[selectedEventIndex].attachment!.path;

@@ -76,9 +76,12 @@ class InheritedCustomTheme extends InheritedWidget {
   final ThemeData themeData;
   final CustomThemeState state;
 
-  InheritedCustomTheme(
-      {required this.themeData, required this.state, Key? key, required Widget child})
-      : super(
+  InheritedCustomTheme({
+    required this.themeData,
+    required this.state,
+    Key? key,
+    required Widget child,
+  }) : super(
           key: key,
           child: child,
         );

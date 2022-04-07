@@ -2,7 +2,7 @@ import '../models/category.dart';
 
 class HomeState {
   final List<Category> categories;
-  int? index;
+  final int? index;
 
   HomeState({
     this.categories = const [],

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-import '../../cubit/category_cubit/category_list_cubit.dart';
 import '../../models/event.dart';
-import 'edit_chat_item_dialog.dart';
-import 'move_event_tile.dart';
+import '../screens/Chat_Screen/edit_chat_item_dialog.dart';
+import '../screens/Chat_Screen/move_event_tile.dart';
+import '../screens/chat_screen/cubit/event_cubit.dart';
 
 class EditAction extends StatelessWidget {
+  final EventCubit eventCubit;
   final Event event;
   final String eventKey;
 
@@ -15,18 +15,20 @@ class EditAction extends StatelessWidget {
     Key? key,
     required this.event,
     required this.eventKey,
+    required this.eventCubit,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return SlidableAction(
       onPressed: (context) => chatTileEditDialog(
+        eventCubit: eventCubit,
         isBookmarked: event.favorite,
         key: eventKey,
         title: event.title,
         context: context,
       ),
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       foregroundColor: Theme.of(context).primaryColor,
       icon: Icons.edit,
     );
@@ -34,10 +36,13 @@ class EditAction extends StatelessWidget {
 }
 
 class MoveAction extends StatelessWidget {
+  final String categoryName;
   final String eventKey;
+
   MoveAction({
     Key? key,
     required this.eventKey,
+    required this.categoryName,
   }) : super(key: key);
 
   @override
@@ -45,9 +50,13 @@ class MoveAction extends StatelessWidget {
     return SlidableAction(
       autoClose: true,
       onPressed: (context) {
-        moveTile(context: context, eventKey: eventKey);
+        moveTile(
+          context: context,
+          eventKey: eventKey,
+          categoryName: categoryName,
+        );
       },
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       foregroundColor: Theme.of(context).primaryColor,
       icon: Icons.move_down,
     );
@@ -55,20 +64,20 @@ class MoveAction extends StatelessWidget {
 }
 
 class RemoveAction extends StatelessWidget {
+  final EventCubit eventCubit;
   final String eventKey;
 
   const RemoveAction({
     Key? key,
     required this.eventKey,
+    required this.eventCubit,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return SlidableAction(
-      onPressed: (context) => context
-          .read<CategoryListCubit>()
-          .removeEventInCategory(key: eventKey),
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      onPressed: (context) => eventCubit.removeEventInCategory(key: eventKey),
+      backgroundColor: Colors.transparent,
       foregroundColor: Theme.of(context).primaryColor,
       icon: Icons.delete,
     );

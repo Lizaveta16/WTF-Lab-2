@@ -1,76 +1,81 @@
+// ignore_for_file: prefer_relative_imports
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:my_journal/ui/screens/Category_Screen/cubit/category_cubit.dart';
 
-import '../../cubit/category_cubit/category_list_cubit.dart';
-import '../../cubit/theme_cubit/theme_cubit.dart';
-import '../theme/theme_data.dart';
+import '../screens/chat_screen/cubit/event_cubit.dart';
+import '../screens/home/cubit/home_cubit.dart';
+import '../screens/settings/cubit/settings_cubit.dart';
+import '../screens/settings/settings.dart';
+import '../screens/stats.dart/stats_screen.dart';
+import '../theme/font_cubit/font_cubit.dart';
+import '../theme/theme_cubit/theme_cubit.dart';
 
-class JourneyDrawer extends StatefulWidget {
+class JourneyDrawer extends StatelessWidget {
   const JourneyDrawer({Key? key}) : super(key: key);
 
   @override
-  State<JourneyDrawer> createState() => _JourneyDrawerState();
-}
-
-class _JourneyDrawerState extends State<JourneyDrawer> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final theme = context.read<ThemeCubit>().state == MyThemes.darkTheme;
     return Drawer(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      elevation: 5,
       child: Column(
-        children: [_header(context), _body(context, theme)],
+        children: [_header(context), _body(context)],
       ),
     );
   }
 
-  Widget _body(BuildContext context, bool theme) {
-    var authValue = context.watch<CategoryListCubit>().state.authKey;
-
+  Widget _body(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(10),
       height: MediaQuery.of(context).size.height * 0.8,
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Enable Bio auth'),
-              Switch.adaptive(
-                  activeColor: Theme.of(context).primaryColor,
-                  value: authValue!,
-                  onChanged: (value) async {
-                    context.read<CategoryListCubit>().setAuthKey(value);
-                    context.read<CategoryListCubit>().getAuthKey();
-                  }),
-            ],
+          ListTile(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: ((_) => Settings(
+                        themeCubit: context.read<ThemeCubit>(),
+                        homeCubit: context.read<HomeCubit>(),
+                        settingsCubit: context.read<SettingsCubit>(),
+                        fontCubit: context.read<FontCubit>(),
+                      )),
+                ),
+              );
+            },
+            leading: Icon(
+              Icons.settings,
+              color: Theme.of(context).primaryColor,
+            ),
+            title: const Text(
+              'Settings',
+            ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Night Side'),
-              Switch.adaptive(
-                  activeColor: Theme.of(context).primaryColor,
-                  value: theme,
-                  onChanged: (value) {
-                    setState(() {
-                      value
-                          ? context
-                              .read<ThemeCubit>()
-                              .themeChanged(MyThemeKeys.dark)
-                          : context
-                              .read<ThemeCubit>()
-                              .themeChanged(MyThemeKeys.light);
-                    });
-                  }),
-            ],
-          ),
+          ListTile(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: ((_) => StatsScreen(
+                        categoryCubit: context.read<CategoryCubit>(),
+                        eventCubit: context.read<EventCubit>(),
+                      )),
+                ),
+              );
+            },
+            leading: Icon(
+              Icons.pie_chart,
+              color: Theme.of(context).primaryColor,
+            ),
+            title: const Text(
+              'Statistics',
+            ),
+          )
         ],
       ),
     );
@@ -89,9 +94,12 @@ class _JourneyDrawerState extends State<JourneyDrawer> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Settings',
-                  style: TextStyle(fontSize: 20),
+                Text(
+                  'My Journal',
+                  style: GoogleFonts.bebasNeue(
+                    color: Colors.white,
+                    fontSize: 40,
+                  ),
                 ),
                 Text(
                   DateFormat.yMMMMd()
@@ -99,9 +107,7 @@ class _JourneyDrawerState extends State<JourneyDrawer> {
                         DateTime.now(),
                       )
                       .toString(),
-                  style: const TextStyle(
-                    fontSize: 10,
-                  ),
+                  style: Theme.of(context).textTheme.bodyText2,
                 ),
               ],
             ),
